@@ -17,7 +17,6 @@
         <form action="{% url 'register' %}" method="post">
           {% csrf_token %}
 
-          {% include 'partials/_messages.html' %}
           <div class="form-group">
             <input
               type="text"
