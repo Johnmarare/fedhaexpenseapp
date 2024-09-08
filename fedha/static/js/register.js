@@ -6,6 +6,7 @@ const emailFeedBackArea = document.querySelector(".emailFeedBackArea");
 const submitBtn = document.querySelector(".submit-btn");
 const passwordField = document.querySelector("#passwordField");
 const showPasswordToggle = document.querySelector(".showPasswordToggle");
+
 const handleToggleInput = (e) => {
   if (showPasswordToggle.textContent === "show") {
     showPasswordToggle.textContent = "hide";
@@ -19,7 +20,24 @@ const handleToggleInput = (e) => {
 
 showPasswordToggle.addEventListener("click", handleToggleInput);
 
+// Function to check if the form can be submitted
+const validateForm = () => {
+  const usernameVal = usernameField.value.trim();
+  const emailVal = emailField.value.trim();
+  const passwordVal = passwordField.value.trim();
 
+  if (!usernameVal || !emailVal || !passwordVal) {
+    submitBtn.disabled = true;
+    return;
+  }
+  // Enable submit btn if no field is invalid
+  if (!usernameField.classList.contains('is-invalid') &&
+    !emailField.classList.contains('is-invalid')) {
+    submitBtn.disabled = false;
+  } else {
+    submitBtn.disabled = true;
+  }
+};
 usernameField.addEventListener("keyup", (e) => {
   const usernameVal = e.target.value;
 
@@ -71,6 +89,7 @@ emailField.addEventListener("keyup", (e) => {
           emailFeedBackArea.innerHTML = `<p>${data.email_error}</p>`;
         } else {
           submitBtn.removeAttribute("disabled");
+          emailFeedBackArea.style.display = "none";
         }
       });
   }
