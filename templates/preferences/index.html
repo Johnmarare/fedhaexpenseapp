@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+  <form action="{% url 'preferences' %}" method="post">
+    <div class="input-group">
+        <select class="form-select" id="inputGroupSelect04" aria-label="Example select with input addon">
+          <option selected>Choose...</option>
+          {% for currency in currencies %}
+          
+          <option selected>{{currency.name}} - {{currency.value}}</option>
+          {% endfor %}
+        </select>
+        <input class="btn btn-outline-secondary" type="submit" value="Save" />
+      </div>
+    </form>
+</div>
+
+{% endblock content %}
