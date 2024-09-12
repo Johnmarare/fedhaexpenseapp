@@ -49,6 +49,8 @@ class RegistrationView(View):
         # Validate user
         # create user account
 
+
+        # Get form data
         username = request.POST['username']
         email = request.POST['email']
         password = request.POST['password']
@@ -57,6 +59,7 @@ class RegistrationView(View):
             'fieldValues': request.POST
         }
 
+        # Validate user input
         if not User.objects.filter(username=username).exists():
             if not User.objects.filter(email=email).exists():
                 if len(password) < 6:
@@ -67,6 +70,7 @@ class RegistrationView(View):
                 user.set_password(password)
                 user.is_active = False
                 user.save()
+                # Prepare account activation email
                 current_site = get_current_site(request)
                 email_body = {
                     'user': user,
@@ -77,20 +81,24 @@ class RegistrationView(View):
                 
                 link = reverse('activate', kwargs={
                     'uidb64': email_body['uid'], 'token': email_body['token']})
-                
-                email_subject = 'Activate your account'
+        
 
-                activate_url = 'http://'+current_site.domain+link
+                activate_url = 'http://' + current_site.domain + link
+
+                email_subject = 'Activate your account'
+                email_message = f"Hi {user.username}, \nPlease click the link below to activate your account \n{activate_url}"
                 
                 email = EmailMessage(
                     email_subject,
-                    'Hi '+user.username + ', Click the link below to activate your account \n'+activate_url,
+                    email_message,
                     'noreply@fedha.com',
                     [email],
                 )
 
                 email.send(fail_silently=False)
-                messages.success(request, 'Account created succesfully')
+
+                # Inform user to check email
+                messages.success(request, 'Your account has been created! Please check your email to activate your account.')
                 return render(request, 'authentication/register.html')
 
         return render(request, 'authentication/register.html')
