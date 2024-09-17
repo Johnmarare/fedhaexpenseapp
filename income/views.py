@@ -1,22 +1,29 @@
 from django.shortcuts import render, redirect
-from .models import Source, Income
+from .models import Source, UserIncome
 from django.core.paginator import Paginator
 from userpreferences.models import UserPreference
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 import json
 from django.http import JsonResponse
+from django.utils.dateparse import parse_date
 # Create your views here.
 
 
 def search_income(request):
     if request.method == 'POST':
         search_str = json.loads(request.body).get('searchText')
-        income = Income.objects.filter(
-            amount__istartswith=search_str, owner=request.user) | Income.objects.filter(
-            date__istartswith=search_str, owner=request.user) | Income.objects.filter(
-            description__icontains=search_str, owner=request.user) | Income.objects.filter(
+        
+        # Attempt to parse the search string as a date
+        search_date = parse_date(search_str)
+        
+        income = UserIncome.objects.filter(
+            amount__gte=float(search_str), owner=request.user) | UserIncome.objects.filter(
+            date=search_date, owner=request.user) | UserIncome.objects.filter(
+            description__icontains=search_str, owner=request.user) | UserIncome.objects.filter(
             source__icontains=search_str, owner=request.user)
+        
+        
         data = income.values()
         return JsonResponse(list(data), safe=False)
 
@@ -24,8 +31,8 @@ def search_income(request):
 @login_required(login_url='/authentication/login')
 def index(request):
     categories = Source.objects.all()
-    income = Income.objects.filter(owner=request.user)
-    paginator = Paginator(income, 5)
+    income = UserIncome.objects.filter(owner=request.user)
+    paginator = Paginator(income, 3)
     page_number = request.GET.get('page')
     page_obj = Paginator.get_page(paginator, page_number)
     currency = UserPreference.objects.get(user=request.user).currency
@@ -61,7 +68,7 @@ def add_income(request):
             messages.error(request, 'description is required')
             return render(request, 'income/add_income.html', context)
 
-        Income.objects.create(owner=request.user, amount=amount, date=date,
+        UserIncome.objects.create(owner=request.user, amount=amount, date=date,
                                   source=source, description=description)
         messages.success(request, 'Record saved successfully')
 
@@ -70,7 +77,7 @@ def add_income(request):
 
 @login_required(login_url='/authentication/login')
 def income_edit(request, id):
-    income = Income.objects.get(pk=id)
+    income = UserIncome.objects.get(pk=id)
     sources = Source.objects.all()
     context = {
         'income': income,
@@ -104,7 +111,7 @@ def income_edit(request, id):
 
 
 def delete_income(request, id):
-    income = Income.objects.get(pk=id)
+    income = UserIncome.objects.get(pk=id)
     income.delete()
     messages.success(request, 'record removed')
     return redirect('income')

@@ -5,8 +5,8 @@ from django.utils.timezone import now
 # Create your models here.
 
 
-class Income(models.Model):
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+class UserIncome(models.Model):
+    amount = models.FloatField()  # DECIMAL
     date = models.DateField(default=now)
     description = models.TextField()
     owner = models.ForeignKey(to=User, on_delete=models.CASCADE)
@@ -16,7 +16,7 @@ class Income(models.Model):
         return self.source
 
     class Meta:
-        ordering = ['-date']
+        ordering: ['-date']
 
 
 class Source(models.Model):
