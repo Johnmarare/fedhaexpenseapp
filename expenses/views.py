@@ -3,7 +3,43 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from .models import Category, Expense
+import json
+from django.http import JsonResponse
+from userpreferences.models import UserPreference
 # Create your views here.
+
+
+
+def search_expenses(request):
+    if request.method == 'POST':
+        try:
+            # Check if request body is not empty
+            if not request.body:
+                return JsonResponse({'error': 'Empty request body'}, status=400)
+
+            # Attempt to load the JSON from the request body
+            search_str = json.loads(request.body).get('searchText')
+            
+            if not search_str:
+                return JsonResponse([], safe=False)  # Return empty if no search string is provided
+            
+            # Your filtering logic
+            expenses = Expense.objects.filter(
+                amount__istartswith=search_str, owner=request.user) | Expense.objects.filter(
+                date__istartswith=search_str, owner=request.user) | Expense.objects.filter(
+                description__icontains=search_str, owner=request.user) | Expense.objects.filter(
+                category__icontains=search_str, owner=request.user)
+
+            # Return filtered expenses as JSON
+            data = expenses.values()
+            return JsonResponse(list(data), safe=False)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON in request body'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+    
+
 
 @login_required(login_url='authentication/login')
 def index(request):
@@ -12,9 +48,11 @@ def index(request):
     paginator = Paginator(expenses, 3)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    currency = UserPreference.objects.get(user=request.user).currency
     context = {
         'expenses': expenses,
-        'page_obj': page_obj
+        'page_obj': page_obj,
+        'currency': currency
     }
     return render(request, 'expenses/index.html', context)
 

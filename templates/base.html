@@ -25,7 +25,7 @@
       >
         <li class="nav-item text-nowrap">
           <span class="nav-link" href="">
-            ({{request.user.username}})
+            {{request.user.username}}
           </span>
         </li>
 
@@ -62,11 +62,10 @@
           '<script src="/docs/4.4/static/js/vendor/jquery.slim.min.js"><\/script>'
         );
     </script>
-    <script
-      src="/docs/4.4/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm"
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" 
+            crossorigin="anonymous">
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.9.0/feather.min.js"></script>
      <script src="{% static 'js/main.js' %}"></script>
   </body>
