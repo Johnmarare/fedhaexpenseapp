@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 import json
 from django.http import JsonResponse
 from django.utils.dateparse import parse_date
+import datetime
 # Create your views here.
 
 
@@ -30,7 +31,6 @@ def search_income(request):
 
 @login_required(login_url='/authentication/login')
 def index(request):
-    categories = Source.objects.all()
     income = UserIncome.objects.filter(owner=request.user)
     paginator = Paginator(income, 3)
     page_number = request.GET.get('page')
@@ -115,3 +115,33 @@ def delete_income(request, id):
     income.delete()
     messages.success(request, 'record removed')
     return redirect('income')
+
+
+def income_source_summary(request):
+    todays_date = datetime.date.today()
+    six_months_ago = todays_date-datetime.timedelta(days=30*6)
+    incomes = UserIncome.objects.filter(owner=request.user,
+                                      date__gte=six_months_ago, date__lte=todays_date)
+    finalrep = {}
+
+    def get_source(income):
+        return income.source
+    source_list = list(set(map(get_source, incomes)))
+
+    def get_income_source_amount(source):
+        amount = 0
+        filtered_by_source = incomes.filter(source=source)
+
+        for item in filtered_by_source:
+            amount += item.amount
+        return amount
+
+    for x in incomes:
+        for y in source_list:
+            finalrep[y] = get_income_source_amount(y)
+
+    return JsonResponse({'income_source_data': finalrep}, safe=False)
+
+
+def income_stats_view(request):
+    return render(request, 'income/incomestats.html')
