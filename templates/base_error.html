@@ -1,0 +1,13 @@
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Error{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css?family=Nunito:400,700" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}">
+  </head>
+  <body>
+    {% block content %}{% endblock %}
+  </body>
+</html>
